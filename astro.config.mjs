@@ -8,3 +8,4 @@ export default defineConfig({
   base: "/linkvalue-notes",
   integrations: [mdx(), sitemap()],
 });
+
