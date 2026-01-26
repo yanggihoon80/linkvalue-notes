@@ -9,3 +9,4 @@ export default defineConfig({
   trailingSlash: "always",
   integrations: [mdx(), sitemap()],
 });
+
