@@ -153,3 +153,75 @@ hr {
 	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }
+
+.debt-diagram {
+  position: relative;
+  max-width: 1000px;
+  margin: 24px auto;
+}
+
+.debt-diagram img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+}
+
+.debt-diagram .label {
+  position: absolute;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(31, 41, 55, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  line-height: 1.35;
+}
+
+.debt-diagram .title {
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.debt-diagram ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+}
+
+.debt-diagram li { margin: 4px 0; }
+
+/* 위치(비율 기반) */
+.debt-diagram .left  { left: 5%;  top: 18%;  width: 36%; }
+.debt-diagram .right { right: 5%; top: 18%;  width: 36%; }
+.debt-diagram .bottom{ left: 50%; transform: translateX(-50%); bottom: 6%; width: 52%; text-align: center; }
+
+.debt-diagram .bottom .desc {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* 모바일 대응 */
+@media (max-width: 640px) {
+  .debt-diagram .label {
+    padding: 10px 12px;
+  }
+  .debt-diagram .left,
+  .debt-diagram .right {
+    width: 42%;
+    top: 14%;
+  }
+  .debt-diagram ul { font-size: 12px; }
+}
+
+.hero-image {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;   /* ⚠️ 이 이미지엔 contain이 좋음 */
+  margin: 0 auto 32px;
+  border-radius: 16px;
+  background: #ffffff;
+}
