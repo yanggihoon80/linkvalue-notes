@@ -1,115 +1,418 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
 const base = import.meta.env.BASE_URL;
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const withBase = (p: string) => {
+  const b = base.endsWith('/') ? base.slice(0, -1) : base;
+  const path = p.startsWith('/') ? p : `/${p}`;
+  return `${b}${path}`;
+};
+
+const allPosts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
 <!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`${base}blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
-		<Footer />
-	</body>
+<html lang="ko">
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <style>
+      :root{
+        --page-max: 1120px;
+        --brand-ink: #1A1D2E;
+        --border: rgba(var(--gray), 0.18);
+        --card-radius: 16px;
+      }
+
+      body{
+        background: linear-gradient(
+          180deg,
+          rgba(245,247,250,0.92),
+          rgba(255,255,255,1)
+        );
+      }
+
+      main.page{
+        width: 100%;
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 4rem;
+      }
+
+      .topbar{
+        display:flex;
+        align-items:center;
+        justify-content:flex-start;
+        margin-bottom: 1.2rem;
+      }
+
+      .brand-link,
+      .brand-link:visited{
+        color: var(--brand-ink) !important;
+        text-decoration:none;
+        font-weight: 900;
+        letter-spacing:-0.02em;
+        font-size: 0.95rem;
+      }
+      .brand-link:hover{ text-decoration: underline; }
+
+      header.brand{
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0 0 1.2rem;
+        margin-bottom: 1.6rem;
+      }
+
+      /* ✅ 헤더 좌/우 2컬럼 + 하단정렬 */
+      .brand-grid{
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 1.25rem;
+        align-items: end;
+      }
+
+      .brand-left{ min-width: 260px; }
+
+      .brand-title{
+        margin: 0 0 .45rem;
+        font-size: clamp(1.7rem, 2.7vw, 2.15rem);
+        letter-spacing:-0.03em;
+        color: rgb(var(--black));
+      }
+
+      .brand-sub{
+        margin: 0;
+        color: rgb(var(--gray));
+        font-size: 0.95rem;
+      }
+
+      .meta{
+        margin-top: .95rem;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        color: rgb(var(--gray));
+        font-size: .9rem;
+        flex-wrap: wrap;
+        gap: .75rem;
+      }
+
+      .meta a{
+        color: rgb(var(--accent));
+        font-weight: 800;
+        text-decoration:none;
+      }
+      .meta a:hover{ text-decoration: underline; }
+
+      /* ✅ 검색은 헤더 하단 + 오른쪽 */
+      .brand-right{
+        display:flex;
+        justify-content:flex-end;
+        align-items:flex-end;
+        align-self:end;
+        padding-bottom: .1rem;
+      }
+
+      form.search{ width: 100%; }
+
+      .searchbox{ position: relative; width: 100%; }
+
+      .searchbox .icon{
+        position:absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(var(--gray), 0.95);
+        font-size: 14px;
+        pointer-events: none;
+      }
+
+      .searchbox input{
+        width: 100%;
+        height: 42px;
+        border-radius: 999px;
+        border: 1px solid rgba(var(--gray), 0.22);
+        padding: 0 14px 0 38px;
+        font-size: 0.95rem;
+        background: rgba(255,255,255,0.92);
+        outline: none;
+        color: rgb(var(--black));
+      }
+
+      .searchbox input:focus{
+        border-color: rgba(var(--accent), 0.55);
+        box-shadow: 0 0 0 4px rgba(var(--accent), 0.12);
+      }
+
+      ul.posts{
+        display:grid;
+        grid-template-columns: repeat(2, minmax(0,1fr));
+        gap: 1.6rem;
+        list-style:none;
+        padding:0;
+        margin:0;
+      }
+
+      li.card{
+        border-radius: var(--card-radius);
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.92);
+        transition: transform .15s ease, box-shadow .15s ease;
+      }
+
+      li.card:hover{
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      }
+
+      li.card a{
+        display:block;
+        padding: 1rem;
+        text-decoration:none;
+      }
+
+      .thumb{
+        width:100%;
+        aspect-ratio: 16/9;
+        border-radius: 14px;
+        overflow:hidden;
+        margin-bottom: .85rem;
+        background: rgba(var(--gray-light), 0.35);
+      }
+
+      .thumb img{
+        width:100%;
+        height:100%;
+        object-fit: contain;
+        object-position: center;
+        display:block;
+      }
+
+      .tag-row{
+        display:flex;
+        gap:.4rem;
+        flex-wrap: wrap;
+        margin-bottom: .55rem;
+      }
+
+      .tag{
+        font-size: .72rem;
+        font-weight: 800;
+        padding: .22rem .55rem;
+        border-radius: 999px;
+        border: 1px solid rgba(var(--gray), 0.18);
+        background: rgba(var(--gray-light), 0.45);
+        color: rgb(var(--gray-dark));
+      }
+
+      h4.title{
+        margin:0;
+        font-size: 1.05rem;
+        line-height:1.35;
+        letter-spacing:-0.02em;
+        color: rgb(var(--black));
+      }
+
+      p.date{
+        margin:.4rem 0 0;
+        font-size:.9rem;
+        color: rgb(var(--gray));
+      }
+
+      .empty{
+        margin-top: 1.2rem;
+        border: 1px dashed rgba(var(--gray), 0.35);
+        border-radius: 18px;
+        padding: 2rem 1.25rem;
+        background: rgba(255,255,255,0.75);
+        color: rgb(var(--gray-dark));
+        text-align: center;
+      }
+      .empty h3{ margin: 0 0 .5rem; font-size: 1.15rem; }
+      .empty p{ margin: 0.25rem 0 0; color: rgb(var(--gray)); font-size: 0.95rem; }
+      .empty a{
+        display:inline-block;
+        margin-top: .85rem;
+        color: rgb(var(--accent));
+        font-weight: 800;
+        text-decoration:none;
+      }
+      .empty a:hover{ text-decoration: underline; }
+
+      @media (max-width: 980px){
+        .brand-grid{ grid-template-columns: 1fr 360px; }
+      }
+
+      @media (max-width: 720px){
+        main.page{ padding: 1.35rem 1rem 3rem; }
+        ul.posts{ grid-template-columns: 1fr; }
+        .brand-grid{
+          grid-template-columns: 1fr;
+          gap: .85rem;
+          align-items:start;
+        }
+        .brand-right{
+          justify-content:flex-start;
+          align-self:start;
+          padding-bottom: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="page">
+      <div class="topbar">
+        <a
+          class="brand-link"
+          href="https://www.linkvalue.co"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          LINKVALUE
+        </a>
+      </div>
+
+      <header class="brand">
+        <div class="brand-grid">
+          <div class="brand-left">
+            <h1 class="brand-title">LINKVALUE Notes</h1>
+            <p class="brand-sub">Business Strategy · System Architecture · Data Consulting</p>
+
+            <div class="meta">
+              <span id="resultText">전체 글 <strong id="countAll">{allPosts.length}</strong>개</span>
+              <a id="resetLink" href={Astro.url.pathname} style="display:none;">초기화</a>
+            </div>
+          </div>
+
+          <div class="brand-right">
+            <!-- ✅ action은 현재 경로, q는 URL에 붙지만 “필터링은 JS가 수행” -->
+            <form class="search" method="GET" action={Astro.url.pathname}>
+              <label class="sr-only" for="q">검색</label>
+              <div class="searchbox">
+                <span class="icon" aria-hidden="true">⌕</span>
+                <input
+                  id="q"
+                  type="search"
+                  name="q"
+                  placeholder="검색: 제목 · 설명 · 태그 (Enter)"
+                  aria-label="블로그 검색"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </header>
+
+      <!-- ✅ Empty State는 항상 렌더해두고 JS로 토글 -->
+      <div id="emptyState" class="empty" role="status" aria-live="polite" style="display:none;">
+        <h3>검색 결과가 없어요</h3>
+        <p>다른 키워드로 검색하거나, 태그를 더 짧게 입력해보세요.</p>
+        <a href={Astro.url.pathname}>전체 글 보기</a>
+      </div>
+
+      <ul class="posts" id="postList">
+        {allPosts.map((post) => {
+          const title = post.data.title ?? '';
+          const desc = post.data.description ?? '';
+          const tags = Array.isArray(post.data.tags) ? post.data.tags.join(' ') : '';
+          const haystack = `${title} ${desc} ${tags}`.toLowerCase();
+
+          return (
+            <li class="card" data-search={haystack}>
+              <a href={`${base}blog/${post.id}/`}>
+                {post.data.heroImage && (
+                  <div class="thumb">
+                    <img
+                      src={withBase(post.data.heroImage)}
+                      alt={post.data.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                )}
+
+                {Array.isArray(post.data.tags) && post.data.tags.length > 0 && (
+                  <div class="tag-row" aria-label="tags">
+                    {post.data.tags.slice(0, 3).map((t) => (
+                      <span class="tag">{t}</span>
+                    ))}
+                  </div>
+                )}
+
+                <h4 class="title">{post.data.title}</h4>
+                <p class="date">
+                  <FormattedDate date={post.data.pubDate} />
+                </p>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+
+      <script>
+        (() => {
+          const params = new URLSearchParams(window.location.search);
+          const qRaw = params.get('q') ?? '';
+          const q = qRaw.trim().toLowerCase();
+
+          const input = document.getElementById('q') as HTMLInputElement | null;
+          const cards = Array.from(
+            document.querySelectorAll('#postList .card')
+          ) as HTMLElement[];
+
+          const empty = document.getElementById('emptyState') as HTMLElement | null;
+          const resultText = document.getElementById('resultText') as HTMLElement | null;
+          const reset = document.getElementById('resetLink') as HTMLAnchorElement | null;
+
+          const total = cards.length;
+
+          // 아주 간단 XSS 방지 (undefined fallback 포함)
+          const escapeHtml = (s: string): string => {
+            const map: Record<string, string> = {
+              '&': '&amp;',
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              "'": '&#39;',
+            };
+            return String(s).replace(/[&<>"']/g, (m) => map[m] ?? m);
+          };
+
+          const apply = (query: string): void => {
+            const qq = (query ?? '').trim().toLowerCase();
+            let visible = 0;
+
+            for (const li of cards) {
+              const hay = (li.getAttribute('data-search') || '').toLowerCase();
+              const ok = !qq || hay.includes(qq);
+              li.style.display = ok ? '' : 'none';
+              if (ok) visible += 1;
+            }
+
+            if (resultText) {
+              if (qq) {
+                resultText.innerHTML = `“<strong>${escapeHtml(query)}</strong>” 결과 <strong>${visible}</strong>개`;
+              } else {
+                resultText.innerHTML = `전체 글 <strong>${total}</strong>개`;
+              }
+            }
+
+            if (reset) reset.style.display = qq ? '' : 'none';
+            if (empty) empty.style.display = visible === 0 ? '' : 'none';
+          };
+
+          if (input) input.value = qRaw;
+          apply(qRaw);
+        })();
+      </script>
+
+    </main>
+  </body>
 </html>

@@ -16,20 +16,7 @@
 		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px 32px
 		rgba(var(--gray), 33%);
 }
-@font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-regular.woff") format("woff");
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-bold.woff") format("woff");
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
-}
+
 body {
 	font-family: "Atkinson", sans-serif;
 	margin: 0;
@@ -42,12 +29,14 @@ body {
 	color: rgb(var(--gray-dark));
 	font-size: 20px;
 	line-height: 1.7;
+  min-height: 100vh;
 }
 main {
-	width: 720px;
+	width: min(100% - 2.5rem, 1240px); /* ✅ 전체 레이아웃 폭(블로그 목록/홈) */
 	max-width: calc(100% - 2em);
 	margin: auto;
 	padding: 3em 1em;
+  flex: 1;
 }
 h1,
 h2,
@@ -118,7 +107,7 @@ pre > code {
 	all: unset;
 }
 blockquote {
-	border-left: 4px solid var(--accent);
+	border-left: 4px solid #1034A6;
 	padding: 0 0 0 20px;
 	margin: 0;
 	font-size: 1.333em;
@@ -154,74 +143,36 @@ hr {
 	white-space: nowrap;
 }
 
-.debt-diagram {
-  position: relative;
-  max-width: 1000px;
-  margin: 24px auto;
-}
-
-.debt-diagram img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 16px;
-}
-
-.debt-diagram .label {
-  position: absolute;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
-  color: #1f2937;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(31, 41, 55, 0.08);
-  border-radius: 12px;
-  padding: 12px 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  line-height: 1.35;
-}
-
-.debt-diagram .title {
-  font-weight: 800;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.debt-diagram ul {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 13px;
-}
-
-.debt-diagram li { margin: 4px 0; }
-
-/* 위치(비율 기반) */
-.debt-diagram .left  { left: 5%;  top: 18%;  width: 36%; }
-.debt-diagram .right { right: 5%; top: 18%;  width: 36%; }
-.debt-diagram .bottom{ left: 50%; transform: translateX(-50%); bottom: 6%; width: 52%; text-align: center; }
-
-.debt-diagram .bottom .desc {
-  font-size: 13px;
-  opacity: 0.9;
-}
-
-/* 모바일 대응 */
-@media (max-width: 640px) {
-  .debt-diagram .label {
-    padding: 10px 12px;
-  }
-  .debt-diagram .left,
-  .debt-diagram .right {
-    width: 42%;
-    top: 14%;
-  }
-  .debt-diagram ul { font-size: 12px; }
-}
-
 .hero-image {
   width: 100%;
-  max-height: 420px;
-  object-fit: contain;   /* ⚠️ 이 이미지엔 contain이 좋음 */
   margin: 0 auto 32px;
-  border-radius: 16px;
-  background: #ffffff;
+}
+
+/* ✅ 높이 제한/contain은 img에 적용 */
+.hero-image img {
+  display: block;
+  margin: 0 auto;
+  width: min(1020px, 100%);
+  height: auto;
+  max-height: 420px;     /* 필요 없으면 이 줄 삭제 */
+  object-fit: contain;   /* 필요 없으면 이 줄 삭제 */
+  border-radius: 12px;
+  box-shadow: var(--box-shadow);
+  background: #fff;
+}
+
+/* ✅ 본문(.prose) 안에 들어가는 모든 img는 본문 폭에 맞추고 그림자 제거 */
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.25rem auto;
+  border-radius: 12px;
+  box-shadow: none !important;
+}
+
+.brand-link,
+.brand-link:visited,
+.brand-link:hover {
+  color: var(--brand-ink) !important;
 }

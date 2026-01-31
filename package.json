@@ -3,10 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "astro dev --mode development",
+    "build": "astro build --mode production",
+    "preview": "astro preview --mode production"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
