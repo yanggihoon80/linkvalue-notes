@@ -1,108 +1,82 @@
 ---
-// Import the global.css file here so that it is included on
-// all pages through the use of the <BaseHead /> component.
-import '../styles/global.css';
-import type { ImageMetadata } from 'astro';
-import FallbackImage from '../assets/blog-placeholder-1.jpg';
-import { SITE_TITLE } from '../consts';
+import "../styles/global.css";
+import type { ImageMetadata } from "astro";
+import FallbackImage from "../assets/blog-placeholder-1.jpg";
+import { SITE_TITLE } from "../consts";
 
 interface Props {
   title: string;
-  description: string;
-  // ✅ ImageMetadata 뿐 아니라 public 경로 string도 허용
+  description?: string;
   image?: ImageMetadata | string;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const { title, description, image = FallbackImage } = Astro.props as Props;
 
-const { title, description, image = FallbackImage } = Astro.props;
+// ✅ dev(localhost)에서는 Astro.site가 undefined일 수 있음 → 현재 요청 origin으로 보정
+const siteBase = Astro.site ?? new URL(Astro.url.origin);
 
-// ✅ base-safe helper (GitHub Pages 서브패스 대응)
-const base = import.meta.env.BASE_URL; // 예: "/linkvalue-notes/"
-const withBase = (p: string) => {
-  const b = base.endsWith('/') ? base.slice(0, -1) : base;
-  const path = p.startsWith('/') ? p : `/${p}`;
-  return `${b}${path}`;
-};
+// ✅ canonical (항상 절대 URL)
+const canonicalURL = new URL(Astro.url.pathname, siteBase);
 
-// ✅ OG/Twitter용 "절대 URL" 만들기
-const toAbsoluteUrl = (src: string) => new URL(src, Astro.site).toString();
-
-// ✅ image가 import(ImageMetadata)든 public string이든 모두 처리
-const resolvedOgPath =
-  typeof image === 'string'
-    ? withBase(image) // "/images/..." -> "/linkvalue-notes/images/..."
-    : image.src;      // imported asset path
-
+// ✅ OG 이미지 URL
 const ogImageUrl =
-  typeof image === 'string'
-    ? toAbsoluteUrl(resolvedOgPath)  // base 포함 경로를 site 기준 절대 URL로
-    : new URL(image.src, Astro.site).toString();
+  typeof image === "string"
+    ? new URL(image, siteBase).toString() // "/images/..png" -> "http://localhost:4321/images/..png"
+    : new URL(image.src, siteBase).toString();
 ---
 
-<!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-<!-- 최신 브라우저 -->
-<link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+<!-- ✅ 루트 운영 기준: public 자산은 절대경로로 고정 -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-<!-- PNG fallback -->
-<link rel="icon" type="image/png" sizes="32x32" href={withBase("/favicon-32.png")}>
-<link rel="icon" type="image/png" sizes="16x16" href={withBase("/favicon-16.png")}>
-
-<!-- iOS 홈 화면 -->
-<link rel="apple-touch-icon" sizes="180x180" href={withBase("/apple-touch-icon.png")}>
-<!-- Sitemap & RSS -->
-<link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+<link rel="sitemap" href="/sitemap-index.xml" />
 <link
   rel="alternate"
   type="application/rss+xml"
   title={SITE_TITLE}
-  href={new URL('rss.xml', Astro.site)}
+  href={new URL("rss.xml", siteBase)}
 />
+
 <meta name="generator" content={Astro.generator} />
 
 <!-- Font preloads -->
-<link rel="preload" href={withBase('/fonts/atkinson-regular.woff')} as="font" type="font/woff" crossorigin />
-<link rel="preload" href={withBase('/fonts/atkinson-bold.woff')} as="font" type="font/woff" crossorigin />
+<link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin />
+<link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin />
 
-<!-- Canonical URL -->
-<link rel="canonical" href={canonicalURL} />
+<link rel="canonical" href={canonicalURL.toString()} />
 
-<!-- Primary Meta Tags -->
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
 
-<!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:url" content={canonicalURL.toString()} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImageUrl} />
 
-<!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:url" content={canonicalURL.toString()} />
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={ogImageUrl} />
 
-<style define:vars={{
-  atkinsonRegular: withBase('/fonts/atkinson-regular.woff'),
-  atkinsonBold: withBase('/fonts/atkinson-bold.woff')
-}}>
+<style>
 @font-face {
   font-family: "Atkinson";
-  src: url(var(--atkinsonRegular)) format("woff");
+  src: url("/fonts/atkinson-regular.woff") format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Atkinson";
-  src: url(var(--atkinsonBold)) format("woff");
+  src: url("/fonts/atkinson-bold.woff") format("woff");
   font-weight: 700;
   font-style: normal;
   font-display: swap;

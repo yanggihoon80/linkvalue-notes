@@ -1,19 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { getCollection } from "astro:content";
+import BaseHead from "../../components/BaseHead.astro";
+import FormattedDate from "../../components/FormattedDate.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 
-const base = import.meta.env.BASE_URL;
+// ✅ 루트 운영(EC2 notes.linkvalue.co) 기준: base/withBase 제거
+// ✅ blog 홈 경로는 항상 "/blog/"로 고정
+const BLOG_HOME = "/blog/";
 
-const withBase = (p: string) => {
-  const b = base.endsWith('/') ? base.slice(0, -1) : base;
-  const path = p.startsWith('/') ? p : `/${p}`;
-  return `${b}${path}`;
-};
-
-const allPosts = (await getCollection('blog')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const allPosts = (await getCollection("blog")).sort(
+  (a: any, b: any) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
@@ -22,6 +18,9 @@ const allPosts = (await getCollection('blog')).sort(
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
     <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+      body { margin: 0; }
       :root{
         --page-max: 1120px;
         --brand-ink: #1A1D2E;
@@ -69,7 +68,6 @@ const allPosts = (await getCollection('blog')).sort(
         margin-bottom: 1.6rem;
       }
 
-      /* ✅ 헤더 좌/우 2컬럼 + 하단정렬 */
       .brand-grid{
         display: grid;
         grid-template-columns: 1fr 420px;
@@ -110,7 +108,6 @@ const allPosts = (await getCollection('blog')).sort(
       }
       .meta a:hover{ text-decoration: underline; }
 
-      /* ✅ 검색은 헤더 하단 + 오른쪽 */
       .brand-right{
         display:flex;
         justify-content:flex-end;
@@ -192,6 +189,7 @@ const allPosts = (await getCollection('blog')).sort(
         object-fit: contain;
         object-position: center;
         display:block;
+        background: rgba(255,255,255,0.92);
       }
 
       .tag-row{
@@ -250,17 +248,80 @@ const allPosts = (await getCollection('blog')).sort(
       }
 
       @media (max-width: 720px){
-        main.page{ padding: 1.35rem 1rem 3rem; }
-        ul.posts{ grid-template-columns: 1fr; }
+        /* 전체 여백 줄이기: 화면을 더 꽉 채우게 */
+        main.page{
+          padding: 1rem .75rem 2.5rem;
+        }
+
+        /* 헤더/타이틀 타이포 살짝 다운 */
+        .brand-title{
+          font-size: 1.35rem;
+        }
+        .brand-sub{
+          font-size: .92rem;
+          line-height: 1.45;
+        }
+
+        /* 검색창/메타 영역 간격 줄이기 */
+        header.brand{
+          padding-bottom: .9rem;
+          margin-bottom: 1.1rem;
+        }
+        .meta{
+          font-size: .85rem;
+          gap: .5rem;
+        }
+
+        /* 리스트는 1열, 간격 살짝 줄이기 */
+        ul.posts{
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        /* 카드 패딩을 줄여서 “모바일 카드” 느낌 */
+        li.card a{
+          padding: .85rem;
+        }
+
+        /* 썸네일 라운드/간격도 모바일에 맞춤 */
+        .thumb{
+          border-radius: 12px;
+          margin-bottom: .75rem;
+        }
+
+        /* 태그 줄바꿈/크기 */
+        .tag{
+          font-size: .7rem;
+          padding: .2rem .5rem;
+        }
+
+        /* 제목/날짜 글씨 크기 조정 */
+        h4.title{
+          font-size: 1rem;
+        }
+        p.date{
+          font-size: .85rem;
+        }
+
         .brand-grid{
           grid-template-columns: 1fr;
-          gap: .85rem;
+          gap: .75rem;
           align-items:start;
         }
         .brand-right{
           justify-content:flex-start;
           align-self:start;
           padding-bottom: 0;
+        }
+      }
+
+      @media (max-width: 420px){
+        main.page{
+          padding: .9rem .65rem 2.2rem;
+        }
+        .searchbox input{
+          height: 40px;
+          font-size: .92rem;
         }
       }
     </style>
@@ -287,13 +348,14 @@ const allPosts = (await getCollection('blog')).sort(
 
             <div class="meta">
               <span id="resultText">전체 글 <strong id="countAll">{allPosts.length}</strong>개</span>
-              <a id="resetLink" href={Astro.url.pathname} style="display:none;">초기화</a>
+              <!-- ✅ 초기화는 항상 /blog/ 로 -->
+              <a id="resetLink" href={BLOG_HOME} style="display:none;">초기화</a>
             </div>
           </div>
 
           <div class="brand-right">
-            <!-- ✅ action은 현재 경로, q는 URL에 붙지만 “필터링은 JS가 수행” -->
-            <form class="search" method="GET" action={Astro.url.pathname}>
+            <!-- ✅ 검색 action도 /blog/ 고정 -->
+            <form class="search" method="GET" action={BLOG_HOME}>
               <label class="sr-only" for="q">검색</label>
               <div class="searchbox">
                 <span class="icon" aria-hidden="true">⌕</span>
@@ -310,28 +372,29 @@ const allPosts = (await getCollection('blog')).sort(
         </div>
       </header>
 
-      <!-- ✅ Empty State는 항상 렌더해두고 JS로 토글 -->
       <div id="emptyState" class="empty" role="status" aria-live="polite" style="display:none;">
         <h3>검색 결과가 없어요</h3>
         <p>다른 키워드로 검색하거나, 태그를 더 짧게 입력해보세요.</p>
-        <a href={Astro.url.pathname}>전체 글 보기</a>
+        <a href={BLOG_HOME}>전체 글 보기</a>
       </div>
 
       <ul class="posts" id="postList">
-        {allPosts.map((post) => {
-          const title = post.data.title ?? '';
-          const desc = post.data.description ?? '';
-          const tags = Array.isArray(post.data.tags) ? post.data.tags.join(' ') : '';
+        {allPosts.map((post: any) => {
+          const title = post.data.title ?? "";
+          const desc = post.data.description ?? "";
+          const tags = Array.isArray(post.data.tags) ? post.data.tags.join(" ") : "";
           const haystack = `${title} ${desc} ${tags}`.toLowerCase();
 
           return (
             <li class="card" data-search={haystack}>
-              <a href={`${base}blog/${post.id}/`}>
+              {/* ✅ 링크는 절대경로 */}
+              <a href={`/blog/${post.id}/`}>
                 {post.data.heroImage && (
                   <div class="thumb">
+                    {/* ✅ heroImage는 "/images/..." 형태면 그대로 사용 */}
                     <img
-                      src={withBase(post.data.heroImage)}
-                      alt={post.data.title}
+                      src={post.data.heroImage}
+                      alt={post.data.heroImageAlt ?? post.data.title}
                       loading="lazy"
                       decoding="async"
                     />
@@ -340,7 +403,7 @@ const allPosts = (await getCollection('blog')).sort(
 
                 {Array.isArray(post.data.tags) && post.data.tags.length > 0 && (
                   <div class="tag-row" aria-label="tags">
-                    {post.data.tags.slice(0, 3).map((t) => (
+                    {post.data.tags.slice(0, 3).map((t: any) => (
                       <span class="tag">{t}</span>
                     ))}
                   </div>
@@ -359,60 +422,59 @@ const allPosts = (await getCollection('blog')).sort(
       <script>
         (() => {
           const params = new URLSearchParams(window.location.search);
-          const qRaw = params.get('q') ?? '';
-          const q = qRaw.trim().toLowerCase();
+          const qRaw = params.get("q") ?? "";
 
-          const input = document.getElementById('q') as HTMLInputElement | null;
+          const input = document.getElementById("q") as HTMLInputElement | null;
           const cards = Array.from(
-            document.querySelectorAll('#postList .card')
-          ) as HTMLElement[];
+            document.querySelectorAll<HTMLElement>("#postList .card")
+          );
 
-          const empty = document.getElementById('emptyState') as HTMLElement | null;
-          const resultText = document.getElementById('resultText') as HTMLElement | null;
-          const reset = document.getElementById('resetLink') as HTMLAnchorElement | null;
+          const empty = document.getElementById("emptyState") as HTMLElement | null;
+          const resultText = document.getElementById("resultText") as HTMLElement | null;
+          const reset = document.getElementById("resetLink") as HTMLElement | null;
 
           const total = cards.length;
 
-          // 아주 간단 XSS 방지 (undefined fallback 포함)
           const escapeHtml = (s: string): string => {
             const map: Record<string, string> = {
-              '&': '&amp;',
-              '<': '&lt;',
-              '>': '&gt;',
-              '"': '&quot;',
-              "'": '&#39;',
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
             };
-            return String(s).replace(/[&<>"']/g, (m) => map[m] ?? m);
+            return String(s).replace(/[&<>"']/g, (m: string) => map[m] ?? m);
           };
 
-          const apply = (query: string): void => {
-            const qq = (query ?? '').trim().toLowerCase();
+          const apply = (query: string) => {
+            const qq = (query ?? "").trim().toLowerCase();
             let visible = 0;
 
             for (const li of cards) {
-              const hay = (li.getAttribute('data-search') || '').toLowerCase();
+              const hay = (li.getAttribute("data-search") || "").toLowerCase();
               const ok = !qq || hay.includes(qq);
-              li.style.display = ok ? '' : 'none';
+              li.style.display = ok ? "" : "none";
               if (ok) visible += 1;
             }
 
             if (resultText) {
               if (qq) {
-                resultText.innerHTML = `“<strong>${escapeHtml(query)}</strong>” 결과 <strong>${visible}</strong>개`;
+                resultText.innerHTML =
+                  `“<strong>${escapeHtml(query)}</strong>” 결과 <strong>${visible}</strong>개`;
               } else {
-                resultText.innerHTML = `전체 글 <strong>${total}</strong>개`;
+                resultText.innerHTML =
+                  `전체 글 <strong>${total}</strong>개`;
               }
             }
 
-            if (reset) reset.style.display = qq ? '' : 'none';
-            if (empty) empty.style.display = visible === 0 ? '' : 'none';
+            if (reset) reset.style.display = qq ? "" : "none";
+            if (empty) empty.style.display = (qq && visible === 0) ? "" : "none";
           };
 
           if (input) input.value = qRaw;
           apply(qRaw);
         })();
       </script>
-
     </main>
   </body>
 </html>

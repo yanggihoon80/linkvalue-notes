@@ -7,7 +7,7 @@ export async function GET(context) {
 	return rss({
 		title: SITE_TITLE,
 		description: SITE_DESCRIPTION,
-		site: context.site,
+		site: context.site ?? "https://notes.linkvalue.co", // ✅ 이 한 줄로 100% 해결,
 		items: posts.map((post) => ({
 			...post.data,
 			link: `/blog/${post.id}/`,
