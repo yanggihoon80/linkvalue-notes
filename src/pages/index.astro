@@ -1,5 +1,7 @@
 ---
-const base = import.meta.env.BASE_URL; // 보통 "/"
-const toBlog = `${base}blog/`.replace(/\/{2,}/g, "/");
-return Astro.redirect(toBlog, 302);
+//nginx에서 redirect 처리하도록 변경
+//추후 notes 페이지 확장시 메인 페이지로 활용 가능
+//const base = import.meta.env.BASE_URL; // 보통 "/"
+//const toBlog = `${base}blog/`.replace(/\/{2,}/g, "/");
+//return Astro.redirect(toBlog, 302);
 ---
